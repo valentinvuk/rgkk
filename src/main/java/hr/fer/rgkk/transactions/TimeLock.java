@@ -30,8 +30,40 @@ public class TimeLock extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        // TODO: Create Locking script
-        throw new UnsupportedOperationException();
+        ScriptBuilder scriptBuilder = new ScriptBuilder();
+        scriptBuilder
+
+                .op(OP_NOTIF) //stack==0
+
+                .smallNum(2)
+                .data(aliceSecretKey.getPubKey())
+                .data(bobSecretKey.getPubKey())
+                .smallNum(2)
+                .op(OP_CHECKMULTISIG)
+
+
+
+                .op(OP_ELSE)  //stack==1
+
+                .number(Instant.parse("2014-10-01T00:00:00Z").getEpochSecond())
+                .op(OP_CHECKLOCKTIMEVERIFY)
+                .op(OP_DROP)
+
+                .op(OP_DUP)
+                .op(OP_HASH160)
+                .data(eveSecretKey.getPubKeyHash())
+                .op(OP_EQUALVERIFY)
+                .op(OP_CHECKSIG)
+
+                .smallNum(1)
+                .data(aliceSecretKey.getPubKey())
+                .data(bobSecretKey.getPubKey())
+                .smallNum(2)
+                .op(OP_CHECKMULTISIG)
+
+                .op(OP_ENDIF);
+
+        return scriptBuilder.build();
     }
 
     @Override
