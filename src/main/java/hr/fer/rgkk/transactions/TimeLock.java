@@ -3,11 +3,9 @@ package hr.fer.rgkk.transactions;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.Utils;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 
-import java.time.Instant;
 
 import static org.bitcoinj.script.ScriptOpCodes.*;
 
@@ -30,40 +28,32 @@ public class TimeLock extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        ScriptBuilder scriptBuilder = new ScriptBuilder();
-        scriptBuilder
-
-                .op(OP_NOTIF) //stack==0
-
-                .smallNum(2)
-                .data(aliceSecretKey.getPubKey())
-                .data(bobSecretKey.getPubKey())
-                .smallNum(2)
-                .op(OP_CHECKMULTISIG)
-
-
-
-                .op(OP_ELSE)  //stack==1
-
-                .number(Instant.parse("2014-10-01T00:00:00Z").getEpochSecond())
-                .op(OP_CHECKLOCKTIMEVERIFY)
-                .op(OP_DROP)
-
-                .op(OP_DUP)
-                .op(OP_HASH160)
-                .data(eveSecretKey.getPubKeyHash())
-                .op(OP_EQUALVERIFY)
-                .op(OP_CHECKSIG)
-
-                .smallNum(1)
-                .data(aliceSecretKey.getPubKey())
-                .data(bobSecretKey.getPubKey())
-                .smallNum(2)
-                .op(OP_CHECKMULTISIG)
-
-                .op(OP_ENDIF);
-
-        return scriptBuilder.build();
+        try {
+            return new ScriptBuilder()
+                    .op(OP_NOTIF)
+                    .op(OP_2)
+                    .data(aliceSecretKey.getPubKey())
+                    .data(bobSecretKey.getPubKey())
+                    .op(OP_2)
+                    .op(OP_CHECKMULTISIG)
+                    .op(OP_ELSE)
+                    .number(1412121600)
+                    .op(OP_CHECKLOCKTIMEVERIFY)
+                    .op(OP_DROP)
+                    .op(OP_DUP)
+                    .op(OP_HASH160)
+                    .data(eveSecretKey.getPubKeyHash())
+                    .op(OP_EQUALVERIFY)
+                    .op(OP_CHECKSIG)
+                    .data(aliceSecretKey.getPubKey())
+                    .data(bobSecretKey.getPubKey())
+                    .op(OP_2)
+                    .op(OP_CHECKMULTISIG)
+                    .op(OP_ENDIF)
+                    .build();
+        }  catch (Exception e) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
