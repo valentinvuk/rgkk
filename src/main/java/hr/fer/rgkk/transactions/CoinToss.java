@@ -3,7 +3,6 @@ package hr.fer.rgkk.transactions;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -42,7 +41,43 @@ public class CoinToss extends ScriptTransaction {
     @Override
     public Script createLockingScript() {
         // TODO: Create Locking script
-        throw new UnsupportedOperationException();
+        try {
+            return new ScriptBuilder()
+                    .op(OP_HASH160)
+                    .data(aliceNonce)
+                    .op(OP_HASH160)
+                    .op(OP_EQUALVERIFY)
+                    .op(OP_HASH160)
+                    .data(bobNonce)
+                    .op(OP_HASH160)
+                    .op(OP_EQUALVERIFY)
+                    .data(aliceNonce)
+                    .op(OP_SIZE)
+                    .op(OP_16)
+                    .op(OP_EQUAL)
+                    .op(OP_NOT)
+                    .op(OP_SWAP)
+                    .op(OP_DROP)
+                    .data(bobNonce)
+                    .op(OP_SIZE)
+                    .op(OP_16)
+                    .op(OP_EQUAL)
+                    .op(OP_NOT)
+                    .op(OP_SWAP)
+                    .op(OP_DROP)
+                    .op(OP_BOOLOR)
+                    .op(OP_NOTIF)
+                    .data(aliceKey.getPubKey())
+                    .op(OP_CHECKSIG)
+                    .op(OP_ELSE)
+                    .data(bobKey.getPubKey())
+                    .op(OP_CHECKSIG)
+                    .op(OP_ENDIF)
+                    .build();
+        } catch (Exception e){
+            throw new UnsupportedOperationException();
+        }
+
     }
 
     @Override
